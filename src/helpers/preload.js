@@ -1,3 +1,3 @@
 function preload() {
-  ConsolasFont = loadFont('../../public/assets/consolas.ttf');
+  ConsolasFont = loadFont("../../public/assets/consolas.ttf");
 }
