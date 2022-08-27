@@ -1,0 +1,14 @@
+{
+  "name": "foundation-of-vis",
+  "version": "1.0.0",
+  "description": "Visualizer for foundation comp subjects @ unimelb",
+  "main": "index.js",
+  "author": "Dd/Giap/Anh",
+  "license": "MIT",
+  "dependencies": {
+    "live-server": "^1.2.2"
+  },
+  "scripts": {
+    "serve": "live-server --open=/src/index.html --ignore=.git,node_modules"
+  }
+}

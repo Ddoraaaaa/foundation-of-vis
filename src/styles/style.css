@@ -1,0 +1,16 @@
+ul {
+	display: flex;   /* Allow the centering to work */
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-right: 2vw;
+    list-style: none;
+}
+
+li {
+    padding: 1vw;
+}
+
+.name {
+    padding-bottom: 3vw;
+    text-align: center;
+}
