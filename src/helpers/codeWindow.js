@@ -22,6 +22,8 @@ function showCode(curCode, corX = 0, corY = 0, textSz = 30, boxW = 500) {
   textSize(textSz);
 
   let codeText = curCode.codeText;
+  let lineWeight = curCode.lineWeight;
+  let textHigh = curCode.textHigh;
   let needHigh = curCode.needHigh;
   let needLen = curCode.needLen;
   let curHigh = curCode.curHigh;
@@ -29,9 +31,9 @@ function showCode(curCode, corX = 0, corY = 0, textSz = 30, boxW = 500) {
 
   fill('#32d9cb');
   let lineCnt = 0;
-  for(ln of codeText) {
+  for(let i=0; i < codeText.length; i++) {
     rect(corX, corY + lineCnt * lineH + textSz * 0.25, boxW, lineH);
-    lineCnt++;
+    lineCnt+=lineWeight[i];
   }
 
   if(needLen) {
@@ -46,16 +48,16 @@ function showCode(curCode, corX = 0, corY = 0, textSz = 30, boxW = 500) {
   }
 
   lineCnt=0;
-  for(ln of codeText) {
-    if(lineCnt >= curHigh - 1.25 && lineCnt <= curHigh + curLen - 1.75) {
-      fill('gray')
+  for(let i=0; i < codeText.length; i++) {
+    if(textHigh[i]) {
+      fill('white')
     }
     else {
       fill('black');
     }
 
-    text(ln, corX + 0.2 * textSz , corY+ (lineCnt + 1) * lineH);
-    lineCnt++;
+    text(codeText[i], corX + 0.2 * textSz , corY+ (lineCnt + 1) * lineH);
+    lineCnt+=lineWeight[i];
   }
 
   pop();
