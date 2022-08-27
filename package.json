@@ -9,6 +9,10 @@
     "live-server": "^1.2.2"
   },
   "scripts": {
-    "serve": "live-server --open=/src/index.html --ignore=.git,node_modules"
+    "serve": "live-server --open=/src/index.html --ignore=.git,node_modules",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\" \"src/**/*.html\" "
+  },
+  "devDependencies": {
+    "prettier": "2.7.1"
   }
 }
