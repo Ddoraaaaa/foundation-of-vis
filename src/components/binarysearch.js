@@ -1,60 +1,94 @@
 /// <reference path="../libraries/TSDef/p5.global-mode.d.ts" />
 
+// Pseudo code
+
+var lines = [
+    'lo, hi <- 0, n',
+    'while lo < hi do',
+    '    m <- (lo + hi) / 2',
+    '    if x < A[m] then',
+    '      hi <- m',
+    '    else if x > A[m] then',
+    '      lo <- m + 1',
+    '    else' ,
+    '      return m',
+    'return notfound'
+    ]; 
+
+// Input
+
 var inputN, inputA, inputX; 
 
 var N; 
 var A; 
 var X; 
 
+// UI stuff
+
 var gui; 
 var speed; 
 var backgroundColor; 
+var secondBGColor; 
 var correctAnswerColor; 
-var simulate_button; 
-var programState; 
-var reset_button; 
+var testedColor; 
+var progressBarColor; 
+var simulateButton; 
+var resetButton; 
+var backArrow; 
+var nextArrow; 
 
+// Logic stuff
+
+var _IsPaused; 
 var curFrame;
 var curPhase;  
 var curlpos; 
 var currpos;
 var phases = []; 
+var LoAndHi = []; 
 var frameSum; 
 var phaseNum; 
 
 const NOT_FOUND = -1; 
+
+// length of operations
+
 var INITLength; 
 var COMPLength;
 var ASSILength; 
 var RETLength;
+
+// display 
 
 var sumElementWidth;
 var elementWidth; 
 var element_y1; 
 var elementHeight; 
 
-function setup() {
-    // testing
-    drawingContext.shadowOffsetX = 5;
-    drawingContext.shadowOffsetY = -5;
-    drawingContext.shadowBlur = 10;
-    drawingContext.shadowColor = 'black';
+// background stuff
 
-    backgroundColor = color('#b3fff0');    
+var vnum = 100; 
+var vx = []; 
+var vy = [];
+
+function setup() {
+    createCanvas(windowWidth, windowHeight); 
+    backgroundColor = color(180, 211, 217);    
+    secondBGColor = color(180, 211, 217); 
     correctAnswerColor = color(114, 214, 56); 
+    testedColor = color(168, 141, 50); 
+    progressBarColor = color(28, 55, 74); 
 
     sumElementWidth = 0.6 * windowWidth; 
 
     noStroke(); 
     frameRate(60); 
 
-  initialize(); 
-}
+    createController(); 
 
-function initialize() { 
-  createCanvas(windowWidth, windowHeight); 
-  background(168, 235, 52); 
-  createController(); 
+    readInputAndInitialize(); // initialize for default data
+    console.log('sdlfdslkjf'); 
+    console.log([curlpos, currpos])
 }
 
 function createController() { 
@@ -70,68 +104,83 @@ function createController() {
     inputX = '7'; 
     gui.addGlobals('inputN', 'inputA', 'inputX');  
 
-    simulate_button = createButton('Play/pause');
-    simulate_button.position(windowWidth * 0.8, windowHeight * 0.8); 
-    simulate_button.mousePressed(start_simulation); 
+    simulateButton = createButton('Play');
+    simulateButton.position(windowWidth * 0.8, windowHeight * 0.8); 
+    simulateButton.mousePressed(simulateButtonPressed); 
 
-    reset_button = createButton('Reset'); 
-    reset_button.position(simulate_button.x + simulate_button.width + 15, windowHeight * 0.8); 
-    reset_button.mousePressed(readInputAndInitialize); 
+    resetButton = createButton('Reset'); 
+    resetButton.position(simulateButton.x + simulateButton.width + 15, windowHeight * 0.8); 
+    resetButton.mousePressed(readInputAndInitialize); 
+
+    // prevButton = create
+
+    initBackground(); 
 }
 
-function start_simulation() { 
-    readInputAndInitialize(); 
-    programState = 'simulating'; 
+function initBackground() { 
 
-    INITLength = 45 / speed; 
-    COMPLength = 45 / speed; 
+}
+
+function simulateButtonPressed() { 
+    if(_IsPaused) _play(); 
+    else _pause(); 
+}
+function _pause() { 
+    _IsPaused = 1; 
+    simulateButton.html('Play'); 
+}
+function _play() { 
+    _IsPaused = 0; 
+    simulateButton.html('Pause'); 
+}
+
+function readInputAndInitialize() { 
+    N = parseInt(inputN); 
+    A = inputA.split(',').map(function(item) {
+        return parseInt(item, 30);
+    });
+    X = parseInt(inputX); 
+
+    // console.log(N); 
+    // console.log(A); 
+    // console.log(X); 
+
+    elementWidth = sumElementWidth / N; 
+    elementHeight = elementWidth; 
+    element_y1 = 0.5 * windowHeight - 0.5 * elementHeight; 
+
+    INITLength = 60 / speed; 
+    COMPLength = 60 / speed; 
     ASSILength = 60 / speed; 
     RETLength = 75 / speed; 
+
+    generate_phases(); 
+
+    console.log(phaseNum); 
+    for(let i = 0; i < phaseNum; i++) { 
+        console.log(phases[i]); 
+        console.log(LoAndHi[i]); 
+    }
     
+    _pause(); 
+
     curFrame  = 0; 
     curPhase = 0; 
     curlpos = convert_coordinate(0); 
     currpos = convert_coordinate(N); 
 }
 
-function readInputAndInitialize() { 
-    N = parseInt(inputN); 
-    A = inputA.split(',').map(function(item) {
-        return parseInt(item, 10);
-    });
-    X = parseInt(inputX); 
-
-    elementWidth = sumElementWidth / N; 
-    elementHeight = elementWidth; 
-    element_y1 = 0.5 * windowHeight - 0.5 * elementHeight; 
-
-    programState = 'resting'; 
-    generate_phases(); 
-}
-
-function addPhase(arg1, arg2, duration, lineNumber) { 
-    phases[phaseNum] = [arg1, arg2, frameSum + duration, lineNumber]; 
-    frameSum += duration;
-    phaseNum++; 
-}
-
-var lines = [
-'lo, hi <- 0, n',
-'while lo < hi do',
-'    m <- (lo + hi) / 2',
-'    if x < A[m] then',
-'      hi <- m',
-'    else if x > A[m] then',
-'      lo <- m + 1',
-'    else' ,
-'      return m',
-'return notfound'
-]; 
-
 function generate_phases() { 
-    frameSum = 0; phaseNum = 0; 
-    addPhase('I', 0, INITLength, 0); 
     let lo = 0, hi = N; 
+    function addPhase(arg1, arg2, duration, lineNumber) { 
+        phases[phaseNum] = [arg1, arg2, frameSum + duration, lineNumber]; 
+        LoAndHi[phaseNum] = [lo, hi]; 
+        frameSum += duration;
+        phaseNum++; 
+    }
+    frameSum = 0; 
+    phaseNum = 0; 
+    addPhase('I', 0, INITLength, 0); 
     while(1) { 
         addPhase('lohi', lo < hi, COMPLength, 1); 
         if(lo < hi) { 
@@ -164,49 +213,38 @@ function convert_coordinate(p) {
     return windowWidth / 2 - elementWidth * N / 2 + elementWidth * p; 
 }
 
-function topLeft(i) { 
-    return [convert_coordinate(i), element_y1]; 
-}
-
 function draw() {
-    background(backgroundColor); 
-    
-    if(programState === 'simulating') curFrame++; 
-    if(programState === 'simulating' && curFrame > frameSum) programState = 'resting'; 
-    else if(programState == 'simulating') { 
-        if(curFrame > phases[curPhase][2]) ++curPhase; 
-    }
+    outputBackground(); 
+    console.log([curFrame, curPhase]); 
+    console.log(phases[curPhase]); 
+    console.log([curlpos, currpos]); 
 
+    if(curFrame + 1 > frameSum) _pause(); 
+    // console.log(['curFrame: ', curFrame, ' / ', frameSum]); 
+    if(_IsPaused === 0) getNextFrame(); 
 
-    if(programState === 'resting') drawRestingFrame(); 
-    else if(programState == 'simulating') drawSimulatingFrame(); 
+    drawFrame(); 
 
-    // console.log('program state '); 
-    // console.log(programState); 
+    outputProgress();
 }
 
-function drawRestingFrame() { 
-    push();
-    fill('white'); 
-    let [x0, y0] = topLeft(0); 
-    rect(x0, y0, elementWidth * N, elementHeight); 
+function outputBackground() { 
+
+}
+
+function outputProgress() { 
+    var x = 0, y = 0; 
+    var x2 = curFrame * 1.0 / frameSum * windowWidth, y2 = 0.005 * windowHeight; 
+    push(); 
+    fill(progressBarColor); 
+    rect(x, y, x2, y2); 
     pop(); 
-    for(let i = 0; i < N; i++) { 
-        let [x,y] = topLeft(i); 
-        
-        push(); 
-        noFill(); 
-        rect(x, y, elementWidth, elementHeight); 
-        pop(); 
-
-        push(); 
-        fill(0);
-        text(String(A[i]), x + elementWidth / 2 - 5, y + elementHeight / 2 + 5); 
-        pop(); 
-    }
 }
 
-function drawSimulatingFrame() { 
+function getNextFrame() { 
+    curFrame++; 
+    if(curFrame > phases[curPhase][2]) ++curPhase; 
+
     let p = phases[curPhase]; 
     if(p[0] === 'I') { 
 
@@ -223,53 +261,60 @@ function drawSimulatingFrame() {
         let frameLeft = p[2] - curFrame + 1; 
         currpos += (desrpos - currpos) / frameLeft; 
     }
-    else if(p[0] == 'lo') { 
+    else if(p[0] === 'lo') { 
         let desLo = p[1]; 
         let deslpos = convert_coordinate(desLo); 
         let frameLeft = p[2] - curFrame + 1; 
         curlpos += (deslpos - curlpos) / frameLeft; 
-        console.log('lo -> ');
-        console.log(desLo);  
     }
-    else if(p[0] == 'R') { 
+    else if(p[0] === 'R') { 
 
     }
+}
+
+function drawFrame() { 
+    background(backgroundColor); 
+
+    let p = phases[curPhase]; 
 
     push();
-    fill('gray'); 
+    fill('white'); 
     rect(convert_coordinate(0), element_y1, elementWidth * N, elementHeight); 
     pop(); 
 
     push(); 
-    fill('white') 
+    noFill(); 
+    stroke('blue'); 
+    strokeWeight(1.5); 
     rect(curlpos, element_y1, currpos - curlpos, elementHeight); 
     pop(); 
 
     push(); 
-    fill('white'); 
+    fill('black'); 
     textAlign(CENTER, CENTER); 
     text('L', curlpos, element_y1 + elementHeight, elementWidth, elementHeight); 
     text('R', currpos, element_y1 - elementHeight, elementWidth, elementHeight); 
     pop(); 
     
-    if(p[0] == 'C') { 
+    if(p[0] === 'C') { 
         let mid = p[1]; 
         push(); 
-        fill('orange'); 
+        stroke(168, 141, 50); 
+        strokeWeight(3);  
         rect(convert_coordinate(mid), element_y1, elementWidth, elementHeight); 
         pop(); 
     }
 
-    if(p[0] == 'R' && p[1] != NOT_FOUND) { 
+    if(p[0] === 'R' && p[1] != NOT_FOUND) { 
         push(); 
-        fill(correctAnswerColor); 
+        stroke(correctAnswerColor); 
+        strokeWeight(3);  
         rect(convert_coordinate(p[1]), element_y1, elementWidth, elementHeight); 
         pop(); 
     }
 
-    for(let i = 0; i < N; i++) { 
-        let [x,y] = topLeft(i); 
-        
+    for(let i = 0; i < N; i++) {        
+        let x = convert_coordinate(i), y = element_y1;  
         push(); 
         noFill(); 
         rect(x, y, elementWidth, elementHeight); 
@@ -283,23 +328,32 @@ function drawSimulatingFrame() {
 
     push(); 
     fill('white'); 
-    rect(500, 700, 200, 100); 
+    rect(0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
     fill('black');
-    text(lines[p[3]], 520, 720); 
+    textAlign(CENTER, CENTER); 
+    text(lines[p[3]], 0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
     pop(); 
 }
 
-function windowResized() { 
+function keyPressed() { 
+    if(keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) {
+        if(keyCode === RIGHT_ARROW) {
+            let desPhase = (curFrame === phases[curPhase][2] && curPhase + 1 != phaseNum)? curPhase + 1: curPhase; 
+            let [deslo, deshi] = LoAndHi[desPhase]; 
+            [curFrame, curPhase, curlpos, currpos] = [phases[desPhase][2], desPhase, convert_coordinate(deslo), convert_coordinate(deshi)]; 
+        }
+        else { 
+            if(curPhase === 0) [curFrame, curPhase, curlpos, currpos] = [0, 0, convert_coordinate(0), convert_coordinate(N)]; 
+            else { 
+                let desPhase = curPhase - 1; 
+                let [deslo, deshi] = LoAndHi[desPhase]; 
+                [curFrame, curPhase, curlpos, currpos] = [phases[desPhase][2], desPhase, convert_coordinate(deslo), convert_coordinate(deshi)]; 
+            }
+        }
+        _pause(); 
+    }
 }
-/*
-lo, hi <- 0, n
-while lo < hi do 
-    m <- (lo + hi) / 2
-    if x < A[m] then
-      hi <- m
-    else if x > A[m] then
-      lo <- m + 1
-    else 
-      return m
-return notfound
-*/
+
+function windowResized() { 
+    
+}
