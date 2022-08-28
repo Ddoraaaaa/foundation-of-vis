@@ -32,7 +32,7 @@ var secondBGColor;
 var correctAnswerColor; 
 var testedColor; 
 var progressBarColor; 
-var simulateButton; 
+var startButton; 
 var resetButton; 
 var backArrow; 
 var nextArrow; 
@@ -79,10 +79,12 @@ function setup() {
     testedColor = color(168, 141, 50); 
     progressBarColor = color(28, 55, 74); 
 
-    sumElementWidth = 0.6 * windowWidth; 
+    sumElementWidth = 0.5 * windowWidth; 
 
     noStroke(); 
     frameRate(60); 
+    textSize(23); 
+    textFont(ConsolasFont); 
 
     createController(); 
 
@@ -93,7 +95,7 @@ function setup() {
 
 function createController() { 
     gui = createGui('Controller'); 
-    
+    gui.setPosition(0.835 * windowWidth, 0.05 * windowHeight); 
 
     sliderRange(0.25, 2, 0.1); 
     speed = 1; let speedMin = 0.5, speedMax = 2, speedStep = 0.1; 
@@ -104,34 +106,42 @@ function createController() {
     inputX = '7'; 
     gui.addGlobals('inputN', 'inputA', 'inputX');  
 
-    simulateButton = createButton('Play');
-    simulateButton.position(windowWidth * 0.8, windowHeight * 0.8); 
-    simulateButton.mousePressed(simulateButtonPressed); 
+        
+    let buttonX =  windowWidth * 0.875, buttonY = windowHeight * 0.4; 
+    startButton = createButton('Start');
+    beautifyButton(startButton);  
+    startButton.mousePressed(startButtonPressed);
 
-    resetButton = createButton('Reset'); 
-    resetButton.position(simulateButton.x + simulateButton.width + 15, windowHeight * 0.8); 
-    resetButton.mousePressed(readInputAndInitialize); 
+    resetButton = createButton('Reset');
+    beautifyButton(resetButton); 
+    resetButton.mousePressed(readInputAndInitialize);; 
+    startButton.position(buttonX, buttonY); 
+    resetButton.position(buttonX, buttonY);  
 
     // prevButton = create
 
     initBackground(); 
 }
 
+function startButtonPressed() { 
+    pausePlay(); 
+    startButton.hide(); 
+    resetButton.show(); 
+}
+
 function initBackground() { 
 
 }
 
-function simulateButtonPressed() { 
-    if(_IsPaused) _play(); 
+function pausePlay() { 
+    if(_IsPaused == 1) _play(); 
     else _pause(); 
 }
 function _pause() { 
     _IsPaused = 1; 
-    simulateButton.html('Play'); 
 }
 function _play() { 
     _IsPaused = 0; 
-    simulateButton.html('Pause'); 
 }
 
 function readInputAndInitialize() { 
@@ -140,10 +150,6 @@ function readInputAndInitialize() {
         return parseInt(item, 30);
     });
     X = parseInt(inputX); 
-
-    // console.log(N); 
-    // console.log(A); 
-    // console.log(X); 
 
     elementWidth = sumElementWidth / N; 
     elementHeight = elementWidth; 
@@ -168,6 +174,9 @@ function readInputAndInitialize() {
     curPhase = 0; 
     curlpos = convert_coordinate(0); 
     currpos = convert_coordinate(N); 
+
+    resetButton.hide(); 
+    startButton.show(); 
 }
 
 function generate_phases() { 
@@ -322,7 +331,7 @@ function drawFrame() {
 
         push(); 
         fill(0);
-        text(String(A[i]), x + elementWidth / 2 - 5, y + elementHeight / 2 + 5); 
+        text(String(A[i]), x + elementWidth / 2 - 8, y + elementHeight / 2 + 8); 
         pop(); 
     }
 
@@ -351,6 +360,9 @@ function keyPressed() {
             }
         }
         _pause(); 
+    }
+    else if(keyCode == SPACE) { 
+        pausePlay(); 
     }
 }
 
