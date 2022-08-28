@@ -1,35 +1,31 @@
-let curCode = {
-  codeText: ["doisa", "dwaff", "long long line of code very long yes yes long very", "dit me cuoc doi", "dit me cuoc doi", "dit me cuoc doi", "dit me cuoc doi", "dit me cuoc doi", "dit me cuoc doi"],
-  curHigh:1,
-  curLen:1,
-
-  needHigh:6,
-  needLen:3,
-};
-
-let curOutp = ["lon, buoi", "dit", "cac", "chimmmmmm"]
-// let curcode = {
-//   code: ["dois\ndsadaw\ndwadwqa"],
-// };
+var myAngle = 30;
+var myColor = "#eeee00";
+var gui;
+let button;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  button = createButton('buoi');
-  button.position(0, 0);
-  button.mousePressed(cac);
-}
+  button = createButton("");
+  button.position(random(windowWidth), random(windowHeight));
+  button.show();
+  // Create the GUI
+  sliderRange(0, 90, 1);
+  gui = createGui("Control");
+  gui.addGlobals("myColor", "myAngle", "button");
 
-function cac() {
-  curOutp.push(`${new Date()}`);
-  updateHigh(curCode, Math.floor(Math.random() * 5)+1, Math.floor(Math.random() * 3)+1)
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  // Only call draw when then gui is changed
+  noLoop();
 }
 
 function draw() {
-  background('pink');
-  showCode(curCode);
-  showOutput(curOutp, 200, 200);
+  // this is a piece of cake
+  background(0);
+  fill(myColor);
+  angleMode(DEGREES);
+  arc(width / 2, height / 2, 100, 100, myAngle / 2, 360 - myAngle / 2, PIE);
+}
+
+// dynamically adjust the canvas to the window
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
