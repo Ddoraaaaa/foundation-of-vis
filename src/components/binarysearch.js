@@ -15,6 +15,21 @@ var lines = [
     'return notfound'
     ]; 
 
+var codeText = [
+    'lo, hi <- 0, n',           // 1
+    'while lo < hi do',         // 2
+    '    m <- (lo + hi) / 2',   // 3
+    '    if x < A[m] then',     // 4
+    '      hi <- m',            // 5
+    '    else if x > A[m] then',// 6
+    '      lo <- m + 1',        // 7
+    '    else' ,                // 8
+    '      return m',           // 9
+    'return notfound'           // 10
+];
+
+var lineWeight = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]; 
+
 // Input
 
 var inputN, inputA, inputX; 
@@ -46,6 +61,7 @@ var curlpos;
 var currpos;
 var phases = []; 
 var LoAndHi = []; 
+var corrLines = []; 
 var frameSum; 
 var phaseNum; 
 
@@ -73,7 +89,7 @@ var vy = [];
 
 function setup() {
     createCanvas(windowWidth, windowHeight); 
-    backgroundColor = color(180, 211, 217);    
+    backgroundColor = '#a2f5dc';    
     secondBGColor = color(180, 211, 217); 
     correctAnswerColor = color(114, 214, 56); 
     testedColor = color(168, 141, 50); 
@@ -120,17 +136,12 @@ function createController() {
 
     // prevButton = create
 
-    initBackground(); 
 }
 
 function startButtonPressed() { 
     pausePlay(); 
     startButton.hide(); 
     resetButton.show(); 
-}
-
-function initBackground() { 
-
 }
 
 function pausePlay() { 
@@ -181,40 +192,41 @@ function readInputAndInitialize() {
 
 function generate_phases() { 
     let lo = 0, hi = N; 
-    function addPhase(arg1, arg2, duration, lineNumber) { 
-        phases[phaseNum] = [arg1, arg2, frameSum + duration, lineNumber]; 
+    function addPhase(arg1, arg2, duration, lines) { 
+        phases[phaseNum] = [arg1, arg2, frameSum + duration]; 
         LoAndHi[phaseNum] = [lo, hi]; 
+        corrLines[phaseNum] = lines; 
         frameSum += duration;
         phaseNum++; 
     }
     frameSum = 0; 
     phaseNum = 0; 
-    addPhase('I', 0, INITLength, 0); 
+    addPhase('I', 0, INITLength, [1, 1]); 
     while(1) { 
-        addPhase('lohi', lo < hi, COMPLength, 1); 
+        addPhase('lohi', lo < hi, COMPLength, [2, 2]); 
         if(lo < hi) { 
-            addPhase('mid', floor((lo + hi) / 2), COMPLength, 2);
+            addPhase('mid', floor((lo + hi) / 2), COMPLength, [3, 3]);
             let mid = floor((lo + hi) / 2); 
-            addPhase('C', mid, COMPLength, 3); 
+            addPhase('C', mid, COMPLength, [4, 4]); 
             if(X < A[mid]) { 
-                addPhase('hi', mid, ASSILength, 4); 
+                addPhase('hi', mid, ASSILength, [5, 5]); 
                 hi = mid; 
             }
             else { 
-                addPhase('C', mid, COMPLength, 5); 
+                addPhase('C', mid, COMPLength, [6, 6]); 
                  if(X > A[mid]) {
-                    addPhase('lo', mid + 1, ASSILength, 6); 
+                    addPhase('lo', mid + 1, ASSILength, [7, 7]); 
                     lo = mid + 1; 
                 }
                 else { 
-                    addPhase('R', mid, RETLength, 8); 
+                    addPhase('R', mid, RETLength, [8, 9]); 
                     return mid; 
                 }
             }
         }
         else break; 
     }
-    addPhase('R', NOT_FOUND, RETLength, 9); 
+    addPhase('R', NOT_FOUND, RETLength, [10, 10]); 
     return NOT_FOUND; 
 }
 
@@ -223,7 +235,6 @@ function convert_coordinate(p) {
 }
 
 function draw() {
-    outputBackground(); 
     console.log([curFrame, curPhase]); 
     console.log(phases[curPhase]); 
     console.log([curlpos, currpos]); 
@@ -233,12 +244,21 @@ function draw() {
     if(_IsPaused === 0) getNextFrame(); 
 
     drawFrame(); 
-
+    displayCode(); 
     outputProgress();
 }
-
-function outputBackground() { 
-
+let params = { 
+    codeText: codeText,
+    lineWeight: lineWeight,
+    needHigh: 0,
+    needLen: 1,
+    curHigh: 0,
+    curLen: 0
+}
+function displayCode() { 
+    let lastPhase = curPhase == 0? 0: curPhase - 1; 
+    params.needHigh = corrLines[curPhase][0];
+    showCode(params, windowWidth * 0.01, windowHeight * 0.375, 18, windowWidth * 0.2); 
 }
 
 function outputProgress() { 
@@ -335,13 +355,13 @@ function drawFrame() {
         pop(); 
     }
 
-    push(); 
-    fill('white'); 
-    rect(0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
-    fill('black');
-    textAlign(CENTER, CENTER); 
-    text(lines[p[3]], 0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
-    pop(); 
+    // push(); 
+    // fill('white'); 
+    // rect(0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
+    // fill('black');
+    // textAlign(CENTER, CENTER); 
+    // text(lines[p[3]], 0.8 * windowWidth, 0.85 * windowHeight, 0.15 * windowWidth, 0.1 * windowHeight); 
+    // pop(); 
 }
 
 function keyPressed() { 

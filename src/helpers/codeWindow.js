@@ -27,7 +27,7 @@ function showCode(curCode, corX = 0, corY = 0, textSz = 30, boxW = 500) {
   let needLen = curCode.needLen;
   let curHigh = curCode.curHigh;
   let curLen = curCode.curLen;
-  console.log(curHigh, needHigh);
+  // console.log(curHigh, needHigh);
   fill("#32d9cb");
   let lineCnt = 0;
   for (let i = 0; i < codeText.length; i++) {
