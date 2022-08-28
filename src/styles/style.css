@@ -14,7 +14,7 @@ p{
 }
 
 .cards {
-    margin-top: -200px;
+    margin-top: -400px;
     justify-content: center;
     display: flex;
     flex-wrap: wrap;
@@ -23,6 +23,7 @@ p{
 .card {
     flex: 0 0 600px;
     margin: 70px;
+    margin-bottom: 30px;
     border: 1px solid rgb(97, 223, 245);
     box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
     background-color: rgb(104, 217, 237);
